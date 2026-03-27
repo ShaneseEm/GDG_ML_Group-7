@@ -20,4 +20,4 @@
 
 ```bash
 git clone https://github.com/ShaneseEm/GDG_ML_Group-7.git
-cd GDG_ML_Group-7/faceauth-ai
+cd GDG_ML_Group-7
