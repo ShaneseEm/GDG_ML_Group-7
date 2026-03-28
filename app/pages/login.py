@@ -3,7 +3,6 @@ from datetime import datetime
 
 import streamlit as st
 
-from components.instructions import render_instruction_block
 from components.navbar import load_css, render_sidebar
 from components.ui_blocks import (
     render_camera_progress_overlay,
@@ -34,15 +33,15 @@ render_page_intro(
     icon="🛰️",
 )
 
-left_col, right_col = st.columns([1.05, 0.95], gap="large")
+left_col, right_col = st.columns([1.12, 0.88], gap="small")
 
 with left_col:
     with st.container():
         st.markdown(
             """
-            <div class="camera-hint fade-in-section">
-                <p class="card-label">Face Scan</p>
-                <p>Center your face inside the frame, keep steady, and start the scan when you are ready.</p>
+            <div class="login-section-header fade-in-section">
+                <p class="card-label">Verification</p>
+                <h3>Scan your face</h3>
             </div>
             """,
             unsafe_allow_html=True,
@@ -78,7 +77,9 @@ with left_col:
             title="Status",
         )
 
-        if st.button("Scan Face", use_container_width=True, type="primary"):
+        action_col1, action_col2 = st.columns([1.3, 0.7], gap="small")
+
+        if action_col1.button("Scan Face", use_container_width=True, type="primary"):
             for progress_value, feedback in [
                 (12, "Camera ready."),
                 (34, "Checking your position..."),
@@ -144,28 +145,45 @@ with left_col:
                     tone="success" if prediction_result.get("access_granted") else "error",
                 )
 
-        login_result = st.session_state.login_result
-        if login_result and login_result.get("access_granted"):
-            st.page_link(
-                "pages/welcome.py",
-                label="Continue",
-                icon=":material/arrow_forward:",
-                use_container_width=True,
-            )
+            if prediction_result.get("access_granted"):
+                st.switch_page("pages/welcome.py")
 
-    render_instruction_block(
-        title="Before You Scan",
-        steps=[
-            "Look directly at the camera and keep your full face inside the circle.",
-            "Hold still for a moment once the scan begins.",
-            "If access is denied, adjust your lighting or position and try again.",
-            "Continue to the next page once your verification is approved.",
-        ],
-    )
+        st.markdown(
+            """
+            <div class="login-subsection-header fade-in-section">
+                <p class="card-label">Navigation</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        nav_col1, nav_col2 = st.columns(2, gap="small")
+        nav_col1.page_link(
+            "main.py",
+            label="Back to Home",
+            icon=":material/home:",
+            use_container_width=True,
+        )
+        nav_col2.page_link(
+            "pages/register.py",
+            label="Register",
+            icon=":material/person_add:",
+            use_container_width=True,
+        )
 
 with right_col:
     result = st.session_state.login_result or {}
     live_state = st.session_state.login_status
+
+    st.markdown(
+        """
+        <div class="login-section-header login-side-header fade-in-section">
+            <p class="card-label">Recognition Status</p>
+            <h3>Current response</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     render_reaction_avatar(
         "success"
@@ -188,13 +206,4 @@ with right_col:
             "We could not verify your identity. Try again with better lighting and a centered position.",
             state="error",
             title="Try Again",
-        )
-    else:
-        render_instruction_block(
-            title="What to Expect",
-            steps=[
-                "Your scan status will update below the camera while verification is in progress.",
-                "Keep your face steady until the scan reaches completion.",
-                "You will be able to continue as soon as access is approved.",
-            ],
         )

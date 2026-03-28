@@ -149,7 +149,7 @@ body {
     display: flex;
     align-items: center;
     min-height: 3rem;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.05rem;
 }
 
 .home-topbar h2 {
@@ -159,7 +159,11 @@ body {
 
 .hero-card {
     padding: 1.75rem;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.55rem;
+}
+
+.home-hero-card {
+    padding: 1.45rem 1.55rem;
 }
 
 .simple-hero {
@@ -212,6 +216,104 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.compact-purpose-card {
+    gap: 0.35rem;
+    padding: 1rem 1.05rem;
+}
+
+.home-mini-list {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 0.95rem;
+}
+
+.home-mini-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.7rem;
+}
+
+.home-mini-item span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: #d6f3ff;
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.home-mini-item p {
+    margin: 0.1rem 0 0;
+    line-height: 1.45;
+}
+
+.home-section-header {
+    margin: 1rem 0 0.65rem;
+}
+
+.home-section-header h3 {
+    margin: 0.2rem 0 0;
+    font-size: 1.4rem;
+}
+
+.compact-section-gap {
+    margin-top: 0.85rem;
+}
+
+.login-section-header {
+    margin: 0.2rem 0 0.55rem;
+}
+
+.login-section-header h3 {
+    margin: 0.18rem 0 0;
+    font-size: 1.28rem;
+}
+
+.login-side-header {
+    margin-top: 0.15rem;
+}
+
+.login-subsection-header {
+    margin: 0.25rem 0 0.5rem;
+}
+
+.login-camera-hint {
+    margin-bottom: 0.7rem;
+    padding: 0.9rem 1rem;
+}
+
+.register-section-header {
+    margin: 0.2rem 0 0.55rem;
+}
+
+.register-section-header h3 {
+    margin: 0.18rem 0 0;
+    font-size: 1.28rem;
+}
+
+.register-side-header {
+    margin-top: 0.15rem;
+}
+
+.register-subsection-header {
+    margin: 0.25rem 0 0.45rem;
+}
+
+.compact-register-subsection {
+    margin-top: 0.3rem;
+}
+
+.register-camera-hint {
+    margin-bottom: 0.7rem;
+    padding: 0.9rem 1rem;
 }
 
 .hero-avatar-wrap {
@@ -283,6 +385,11 @@ body {
     min-height: 180px;
 }
 
+.compact-feature-card {
+    min-height: 0;
+    padding: 1rem 1.05rem;
+}
+
 .home-purpose-card {
     min-height: 100%;
     padding: 1.1rem;
@@ -290,6 +397,10 @@ body {
 
 .simple-step-card {
     padding: 1rem 1.05rem;
+}
+
+.compact-step-card {
+    padding: 0.95rem 1rem;
 }
 
 .simple-step-card p {
@@ -325,6 +436,12 @@ h3 {
     font-size: 1.5rem;
     background: rgba(56, 189, 248, 0.12);
     margin-bottom: 1rem;
+}
+
+.compact-feature-card .feature-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 0.8rem;
 }
 
 .accent-card {
@@ -428,6 +545,7 @@ h3 {
 .reaction-card {
     min-height: 100%;
     text-align: center;
+    padding: 1rem 1rem 1.05rem;
 }
 
 .reaction-avatar {
@@ -507,87 +625,78 @@ div[data-testid="stCameraInput"] canvas {
 }
 
 .camera-progress-overlay {
-    position: relative;
-    z-index: 5;
-    display: flex;
-    justify-content: center;
-    margin-top: calc(var(--camera-size) * -1);
-    margin-bottom: 4rem;
-    pointer-events: none;
+    width: min(100%, var(--camera-size));
+    margin: 0.7rem auto 1rem;
 }
 
-.camera-progress-stage {
-    position: relative;
-    width: var(--camera-size);
-    height: var(--camera-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.camera-progress-ring {
-    --progress: 0;
-    width: var(--camera-size);
-    height: var(--camera-size);
-    border-radius: 50%;
-    background: conic-gradient(var(--accent) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 11px), #000 calc(100% - 10px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 11px), #000 calc(100% - 10px));
-    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.16), 0 10px 24px rgba(2, 6, 23, 0.22);
-}
-
-.camera-progress-ring.tone-idle {
-    background: conic-gradient(rgba(148, 163, 184, 0.75) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-}
-
-.camera-progress-ring.tone-info {
-    background: conic-gradient(var(--accent) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-}
-
-.camera-progress-ring.tone-warning {
-    background: conic-gradient(var(--warning) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.24), 0 10px 24px rgba(245, 158, 11, 0.16);
-}
-
-.camera-progress-ring.tone-success {
-    background: conic-gradient(var(--success) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.24), 0 10px 24px rgba(34, 197, 94, 0.14);
-}
-
-.camera-progress-ring.tone-error {
-    background: conic-gradient(var(--error) calc(var(--progress) * 1%), rgba(15, 23, 42, 0.84) 0);
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.24), 0 10px 24px rgba(239, 68, 68, 0.14);
-}
-
-.camera-progress-badge {
-    position: absolute;
-    left: 50%;
-    bottom: 0.8rem;
-    transform: translateX(-50%);
-    min-width: 9.5rem;
-    max-width: 12rem;
+.camera-progress-panel {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0.65rem 0.85rem;
+    gap: 0.55rem;
+    padding: 0.8rem 0.95rem;
     background: rgba(7, 17, 31, 0.78);
     border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 999px;
-    backdrop-filter: blur(4px);
+    border-radius: 20px;
 }
 
-.camera-progress-badge.tone-warning {
+.camera-progress-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.camera-progress-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.14rem;
+}
+
+.camera-progress-track {
+    width: 100%;
+    height: 0.72rem;
+    overflow: hidden;
+    background: rgba(148, 163, 184, 0.16);
+    border-radius: 999px;
+}
+
+.camera-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+}
+
+.camera-progress-panel.tone-warning {
     border-color: rgba(245, 158, 11, 0.3);
 }
 
-.camera-progress-badge.tone-success {
+.camera-progress-panel.tone-success {
     border-color: rgba(34, 197, 94, 0.3);
 }
 
-.camera-progress-badge.tone-error {
+.camera-progress-panel.tone-error {
     border-color: rgba(239, 68, 68, 0.3);
+}
+
+.camera-progress-fill.tone-idle {
+    background: rgba(148, 163, 184, 0.75);
+}
+
+.camera-progress-fill.tone-info {
+    background: var(--accent);
+}
+
+.camera-progress-fill.tone-warning {
+    background: var(--warning);
+}
+
+.camera-progress-fill.tone-success {
+    background: var(--success);
+}
+
+.camera-progress-fill.tone-error {
+    background: var(--error);
 }
 
 .camera-progress-primary,
@@ -598,7 +707,7 @@ div[data-testid="stCameraInput"] canvas {
 
 .camera-progress-primary {
     color: var(--text);
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 800;
     line-height: 1.1;
 }
@@ -612,10 +721,11 @@ div[data-testid="stCameraInput"] canvas {
 
 .camera-progress-caption {
     color: var(--muted);
-    font-size: 0.62rem;
+    font-size: 0.68rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-top: 0.2rem;
+    margin-top: 0;
+    text-align: right;
 }
 
 .welcome-card {
@@ -728,6 +838,18 @@ div[data-testid="stPageLink"] a {
         width: 100%;
         justify-content: flex-start;
     }
+
+    .home-section-header {
+        margin-top: 0.85rem;
+    }
+
+    .login-section-header {
+        margin-top: 0.1rem;
+    }
+
+    .register-section-header {
+        margin-top: 0.1rem;
+    }
 }
 
 @media (max-width: 900px) {
@@ -740,8 +862,29 @@ div[data-testid="stPageLink"] a {
         padding: 1.2rem;
     }
 
+    .home-hero-card {
+        padding: 1.15rem;
+    }
+
     .feature-card {
         min-height: unset;
+    }
+
+    .home-section-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .login-section-header h3 {
+        font-size: 1.16rem;
+    }
+
+    .register-section-header h3 {
+        font-size: 1.16rem;
+    }
+
+    .home-mini-list {
+        gap: 0.6rem;
+        margin-top: 0.8rem;
     }
 
     div[data-testid="stCameraInput"] > div {
@@ -756,19 +899,16 @@ div[data-testid="stPageLink"] a {
     }
 
     .camera-progress-overlay {
-        margin-top: calc(var(--camera-size-mobile) * -1);
-        margin-bottom: 3.7rem;
+        width: min(100%, var(--camera-size-mobile));
+        margin: 0.7rem auto 1rem;
     }
 
-    .camera-progress-stage,
-    .camera-progress-ring {
-        width: var(--camera-size-mobile);
-        height: var(--camera-size-mobile);
+    .camera-progress-head {
+        flex-direction: column;
+        gap: 0.55rem;
     }
 
-    .camera-progress-badge {
-        min-width: 8.5rem;
-        max-width: 10.5rem;
-        bottom: 0.65rem;
+    .camera-progress-caption {
+        text-align: left;
     }
 }

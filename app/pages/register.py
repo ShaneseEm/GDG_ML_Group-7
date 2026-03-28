@@ -2,14 +2,12 @@ import time
 
 import streamlit as st
 
-from components.instructions import render_instruction_block
 from components.navbar import load_css, render_sidebar
 from components.status_card import render_status_card
 from components.ui_blocks import (
     render_camera_progress_overlay,
     render_feedback_banner,
     render_page_intro,
-    render_tip_card,
 )
 from services.api import capture_registration_images, register_user
 from utils.session import initialize_session_state, reset_registration_state
@@ -35,21 +33,29 @@ render_page_intro(
     icon="📸",
 )
 
-left_col, right_col = st.columns([1.15, 0.85], gap="large")
+left_col, right_col = st.columns([1.12, 0.88], gap="small")
 
 with left_col:
     with st.container():
         st.markdown(
             """
-            <div class="camera-hint fade-in-section">
-                <p class="card-label">Capture Setup</p>
-                <p>Adjust the camera, choose how many photos to collect, and keep your face centered throughout the scan.</p>
+            <div class="register-section-header fade-in-section">
+                <p class="card-label">Registration</p>
+                <h3>Create your face profile</h3>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        st.subheader("User Details")
+        st.markdown(
+            """
+            <div class="register-subsection-header fade-in-section">
+                <p class="card-label">Profile Details</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         user_identifier = st.text_input(
             "Full Name or User ID",
             value=st.session_state.registration_form.get("user_identifier", ""),
@@ -86,10 +92,10 @@ with left_col:
         render_feedback_banner(
             st.session_state.registration_message,
             state="error" if st.session_state.registration_status == "error" else "info",
-            title="Registration Feedback",
+            title="Status",
         )
 
-        action_col1, action_col2 = st.columns(2)
+        action_col1, action_col2 = st.columns([1, 1], gap="small")
 
         with action_col1:
             if st.button("Start Scanning", use_container_width=True, type="primary"):
@@ -199,24 +205,45 @@ with left_col:
             reset_registration_state()
             st.rerun()
 
+        st.markdown(
+            """
+            <div class="register-subsection-header fade-in-section compact-register-subsection">
+                <p class="card-label">Navigation</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        nav_col1, nav_col2 = st.columns(2, gap="small")
+        nav_col1.page_link(
+            "main.py",
+            label="Back to Home",
+            icon=":material/home:",
+            use_container_width=True,
+        )
+        nav_col2.page_link(
+            "pages/login.py",
+            label="Go to Login",
+            icon=":material/verified_user:",
+            use_container_width=True,
+        )
+
         if st.session_state.registration_status == "error":
             st.error(st.session_state.registration_message)
         elif st.session_state.registration_status in {"collecting", "captured", "complete"}:
             st.info(st.session_state.registration_message)
 
-    render_instruction_block(
-        title="Registration Instructions",
-        steps=[
-            "Enter a valid full name or user ID before starting registration.",
-            "Choose a photo count between 30 and 90 based on how complete you want the profile to be.",
-            "Keep your face inside the frame while the scan collects each image.",
-            "Start scanning before completing registration.",
-            "Use steady lighting and small head turns to improve capture quality.",
-        ],
+with right_col:
+    st.markdown(
+        """
+        <div class="register-section-header register-side-header fade-in-section">
+            <p class="card-label">Capture Overview</p>
+            <h3>Progress and quality</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-with right_col:
-    st.subheader("Registration Status")
     capture_result = st.session_state.registration_capture
     registration_result = st.session_state.registration_result
 
@@ -242,7 +269,7 @@ with right_col:
         "Captured Images",
         str(st.session_state.registration_scanned_images or capture_result.get("images_captured", 0)),
         state="captured",
-        caption="The circular counter tracks progress toward the selected number of photos.",
+        caption="Tracks the number of photos collected for this profile.",
         icon="✅",
     )
 
@@ -252,14 +279,4 @@ with right_col:
         state="info" if st.session_state.registration_progress else "idle",
         caption="Tracks how far the current capture sequence has progressed.",
         icon="📈",
-    )
-
-    render_tip_card(
-        "Keep capture quality consistent",
-        tips=[
-            "Look straight at the camera before turning slightly left and right.",
-            "Keep good lighting on your face and avoid strong backlight.",
-            "Keep your face inside the frame during each scan step.",
-            "Pause briefly between angles so each image is usable for training.",
-        ],
     )

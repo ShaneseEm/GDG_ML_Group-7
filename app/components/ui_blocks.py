@@ -94,12 +94,16 @@ def render_camera_progress_overlay(
     st.markdown(
         f"""
         <div class="camera-progress-overlay">
-            <div class="camera-progress-stage">
-                <div class="camera-progress-ring tone-{escape(safe_tone)}" style="--progress:{safe_progress};"></div>
-                <div class="camera-progress-badge tone-{escape(safe_tone)}">
-                    <p class="camera-progress-primary">{escape(primary_text)}</p>
-                    <p class="camera-progress-secondary">{escape(secondary_text)}</p>
+            <div class="camera-progress-panel tone-{escape(safe_tone)}">
+                <div class="camera-progress-head">
+                    <div class="camera-progress-copy">
+                        <p class="camera-progress-primary">{escape(primary_text)}</p>
+                        <p class="camera-progress-secondary">{escape(secondary_text)}</p>
+                    </div>
                     <p class="camera-progress-caption">{escape(caption)}</p>
+                </div>
+                <div class="camera-progress-track" aria-hidden="true">
+                    <div class="camera-progress-fill tone-{escape(safe_tone)}" style="width: {safe_progress}%;"></div>
                 </div>
             </div>
         </div>

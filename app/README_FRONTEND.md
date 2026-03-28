@@ -1,10 +1,10 @@
-# FaceAuth AI Frontend
+# FaceAuth AI App
 
-This folder contains the Streamlit frontend for the FaceAuth AI capstone project.
+This folder contains the Streamlit app for the FaceAuth AI project.
 
 ## Purpose
 
-The frontend provides a clean UI for:
+The app provides a clean UI for:
 
 - home and landing experience
 - face registration flow
@@ -14,7 +14,7 @@ The frontend provides a clean UI for:
 
 ## Folder Structure
 
-frontend/
+app/
 |-- main.py
 |-- pages/
 |   |-- register.py
@@ -40,7 +40,7 @@ frontend/
 From the project root, run:
 
 ```bash
-streamlit run frontend/main.py
+streamlit run app/main.py
 ```
 
 ## What Is Mocked Right Now
@@ -51,18 +51,18 @@ streamlit run frontend/main.py
 - prediction result and confidence score
 - authenticated welcome session display
 
-These mocks exist only so the frontend can be demonstrated before the real backend is connected.
+These mocks exist only so the app can be demonstrated before the real backend is connected.
 
 ## Where To Connect Real Logic Later
 
-- frontend/services/api.py
+- app/services/api.py
   - connect registration requests to backend functions
   - connect login requests to prediction logic
-- frontend/services/mock_backend.py
+- app/services/mock_backend.py
   - replace temporary mock responses with real implementations
-- frontend/pages/register.py
+- app/pages/register.py
   - connect webcam capture and registration actions
-- frontend/pages/login.py
+- app/pages/login.py
   - connect face scan and inference results
 
 ## Planned Backend Hooks
@@ -77,5 +77,5 @@ These mocks exist only so the frontend can be demonstrated before the real backe
 ## Notes
 
 - The UI intentionally avoids real ML logic.
-- The service layer keeps the frontend easy to merge later into a larger app or src structure.
+- The service layer keeps the app easy to merge later into a larger app or src structure.
 - Session state is used to preserve registration and login results during the Streamlit session.
