@@ -20,3 +20,17 @@ def preprocess_face(face_img, target_size=(64, 64)):
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
     face_resized = cv2.resize(face_img, target_size)
     return face_resized.flatten().reshape(1, -1)
+
+def detect_face(img, cascade_path="haarcascade_frontalface_default.xml"):
+    cascade = cv2.CascadeClassifier(cascade_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = cascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(30, 30),
+        flags=cv2.CASCADE_SCALE_IMAGE,
+    )
+    if len(faces) == 0:
+        return None
+    return faces[0]
