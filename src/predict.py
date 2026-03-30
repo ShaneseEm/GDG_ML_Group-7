@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import cv2
 import numpy as np
 import joblib
@@ -230,5 +229,4 @@ def run_system(confidence_threshold=0.6):
 
 
 if __name__ == "__main__":
->>>>>>> 1c025fedb6a85ca54d9dc0dd1f30ef4560858b9b
-    run_system()
+  run_system()
