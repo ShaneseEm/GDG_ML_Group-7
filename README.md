@@ -21,3 +21,12 @@
 ```bash
 git clone https://github.com/ShaneseEm/GDG_ML_Group-7.git
 cd GDG_ML_Group-7
+
+
+- **Backend / Logic Engineer – Prediction System**  
+  **Arsema Negash**  
+  - Implements `src/predict.py`.
+  - Runs webcam login loop (`run_system`).
+  - Detects face with OpenCV Haar Cascade, preprocesses images (convert to grayscale, resize to 64×64, flatten to feature vector), and loads the trained model from `models/face_model.pkl`.
+  - Uses a confidence threshold (default `0.6`) to decide whether to show “Access Granted” (high confidence) or “Access Denied / Unknown / Low Confidence” (low confidence or no face).
+  - Handles the case when the model file is not yet created, so the webcam still runs and displays “Model not loaded” instead of crashing.
