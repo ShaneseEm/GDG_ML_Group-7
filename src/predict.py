@@ -24,7 +24,10 @@ def preprocess_face(face_img, target_size=(64, 64)):
     if len(face_img.shape) == 3:
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
     face_resized = cv2.resize(face_img, target_size)
-    return face_resized.flatten().reshape(1, -1)
+
+    face_normalized = face_resized / 255.0
+
+    return face_normalized.flatten().reshape(1, -1)
 
 
 def detect_face(img, cascade_path="haarcascade_frontalface_default.xml"):
