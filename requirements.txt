@@ -1,0 +1,9 @@
+Flask
+insightface
+onnxruntime
+opencv-python-headless
+scikit-learn
+numpy
+scikit-image
+pillow
+gunicorn
