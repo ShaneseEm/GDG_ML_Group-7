@@ -4,6 +4,12 @@ import streamlit as st
 def initialize_session_state() -> None:
     defaults = {
         "registration_form": {"user_identifier": "", "photo_count": 45},
+        "registration_capture_active": False,
+        "registration_last_capture_digest": "",
+        "registration_last_processed_capture_digest": "",
+        "registration_pending_capture_bytes": b"",
+        "registration_pending_capture_digest": "",
+        "registration_last_trained_count": 0,
         "registration_status": "idle",
         "registration_message": "Waiting for user input.",
         "registration_progress": 0,
@@ -25,6 +31,12 @@ def initialize_session_state() -> None:
 
 
 def reset_registration_state() -> None:
+    st.session_state.registration_capture_active = False
+    st.session_state.registration_last_capture_digest = ""
+    st.session_state.registration_last_processed_capture_digest = ""
+    st.session_state.registration_pending_capture_bytes = b""
+    st.session_state.registration_pending_capture_digest = ""
+    st.session_state.registration_last_trained_count = 0
     st.session_state.registration_status = "idle"
     st.session_state.registration_message = "Waiting for user input."
     st.session_state.registration_progress = 0

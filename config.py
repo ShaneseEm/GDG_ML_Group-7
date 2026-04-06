@@ -1,6 +1,16 @@
-import os
+from pathlib import Path
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+DATA_DIR = PROJECT_ROOT / "data"
+RAW_DATA_DIR = DATA_DIR / "raw"
+DATASET_DIR = DATA_DIR / "dataset"
+PROCESSED_DATA_DIR = DATA_DIR / "processed"
+MODELS_DIR = PROJECT_ROOT / "models"
 
 IMG_SIZE = (64, 64)
-DATA_PATH = "data/raw"
-MODEL_PATH = "models/face_model.pkl"
-# This XML is built into OpenCV, no need to download it separately
+MODEL_PATH = MODELS_DIR / "face_model.pkl"
+DATA_PATH = RAW_DATA_DIR
+TRAINING_DATA_PATH = DATASET_DIR
+KNN_DISTANCE_THRESHOLD = 0.35
+PROBABILITY_THRESHOLD = 0.6

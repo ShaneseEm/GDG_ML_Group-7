@@ -1,24 +1,40 @@
-from services import mock_backend
+from pathlib import Path
+import sys
 
 
-def capture_registration_images(name: str) -> dict:
-    # TODO: Replace mock capture with OpenCV webcam capture logic or backend API request.
-    return mock_backend.capture_registration_images(name)
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+def _get_backend_service_module():
+    from backend import service as backend_service_module
+
+    return backend_service_module
 
 
-def register_user(name: str) -> dict:
-    # TODO: Replace mock orchestration with calls to:
-    # - capture_user_images(name)
-    # - save_registration(name)
-    # - preprocess_registered_faces(name)
-    return mock_backend.register_user(name)
+def capture_registration_images(
+    name: str,
+    target_image_count: int | None = None,
+    uploaded_file=None,
+) -> dict:
+    backend_service_module = _get_backend_service_module()
+    return backend_service_module.capture_registration_images(
+        name,
+        target_image_count=target_image_count,
+        uploaded_file=uploaded_file,
+    )
 
 
-def login_with_face() -> dict:
-    # TODO: Replace mock scan with capture_login_face() integration.
-    return mock_backend.capture_login_face()
+def register_user(name: str, target_image_count: int | None = None) -> dict:
+    backend_service_module = _get_backend_service_module()
+    return backend_service_module.register_user(name, target_image_count)
 
 
-def get_prediction_result() -> dict:
-    # TODO: Replace mock prediction with trained model inference and confidence checks.
-    return mock_backend.predict_login_result()
+def login_with_face(uploaded_file=None) -> dict:
+    backend_service_module = _get_backend_service_module()
+    return backend_service_module.capture_login_face(uploaded_file)
+
+
+def get_prediction_result(uploaded_file=None) -> dict:
+    backend_service_module = _get_backend_service_module()
+    return backend_service_module.predict_login_result(uploaded_file)

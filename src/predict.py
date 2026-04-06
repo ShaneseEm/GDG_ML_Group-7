@@ -6,10 +6,10 @@ import cv2
 import joblib
 import numpy as np
 
+from config import KNN_DISTANCE_THRESHOLD, MODEL_PATH, PROBABILITY_THRESHOLD
+from src.preprocessing import process_image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-MODEL_PATH = Path("models/face_model.pkl")
 
 
 def load_model(model_path: Path = MODEL_PATH):
@@ -51,29 +51,78 @@ def detect_face(img, cascade_path="haarcascade_frontalface_default.xml"):
     return faces[0]
 
 
-def predict_face(frame, model=None, distance_threshold: float = 0.8):
+def predict_face(frame, model=None, distance_threshold: float = KNN_DISTANCE_THRESHOLD):
     model = model or load_model()
-    face_rect = detect_face(frame, cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-    if face_rect is None:
-        return None, 0.0
+    features = process_image(frame)
+    if features is None:
+        return {
+            "recognized_user": None,
+            "access_granted": False,
+            "score": 0.0,
+            "metric": "distance",
+            "threshold": distance_threshold,
+            "message": "No face was detected in the captured image.",
+        }
 
-    x, y, w, h = face_rect
-    face_roi = frame[y:y + h, x:x + w]
-    features = preprocess_face(face_roi, normalize=True)
+    sample = np.asarray(features, dtype=np.float32).reshape(1, -1)
+
+    if isinstance(model, dict) and model.get("model_type") == "simple_knn":
+        samples = np.asarray(model.get("samples", []), dtype=np.float32)
+        labels = np.asarray(model.get("labels", []))
+        if len(samples) == 0 or len(labels) == 0:
+            return {
+                "recognized_user": None,
+                "access_granted": False,
+                "score": 0.0,
+                "metric": "distance",
+                "threshold": distance_threshold,
+                "message": "The trained model does not contain any saved samples.",
+            }
+
+        normalized_distances = np.linalg.norm(samples - sample, axis=1) / np.sqrt(sample.shape[1])
+        nearest_indices = np.argsort(normalized_distances)[: max(1, int(model.get("k", 1)))]
+        nearest_labels = labels[nearest_indices]
+        nearest_distances = normalized_distances[nearest_indices]
+        unique_labels, counts = np.unique(nearest_labels, return_counts=True)
+        best_label = unique_labels[np.argmax(counts)]
+        score = float(np.mean(nearest_distances))
+        access_granted = score <= distance_threshold
+
+        return {
+            "recognized_user": str(best_label) if access_granted else "Unknown",
+            "access_granted": access_granted,
+            "score": score,
+            "metric": "distance",
+            "threshold": distance_threshold,
+            "message": "Access granted." if access_granted else "Access denied.",
+        }
 
     if hasattr(model, "kneighbors") and hasattr(model, "classes_"):
-        distances, indices = model.kneighbors(features, n_neighbors=1)
+        distances, indices = model.kneighbors(sample, n_neighbors=1)
         distance = float(distances[0][0])
-        if distance < distance_threshold:
-            return model.classes_[indices[0][0]], distance
-        return "Unknown", distance
+        recognized_user = model.classes_[indices[0][0]] if distance < distance_threshold else "Unknown"
+        return {
+            "recognized_user": recognized_user,
+            "access_granted": recognized_user != "Unknown",
+            "score": distance,
+            "metric": "distance",
+            "threshold": distance_threshold,
+            "message": "Access granted." if recognized_user != "Unknown" else "Access denied.",
+        }
 
-    prediction = model.predict(features)[0]
+    prediction = model.predict(sample)[0]
+    confidence = 1.0
     if hasattr(model, "predict_proba"):
-        confidence = float(np.max(model.predict_proba(features)))
-        return prediction, confidence
+        confidence = float(np.max(model.predict_proba(sample)))
 
-    return prediction, 1.0
+    return {
+        "recognized_user": str(prediction),
+        "access_granted": confidence >= PROBABILITY_THRESHOLD,
+        "score": confidence,
+        "metric": "confidence",
+        "threshold": PROBABILITY_THRESHOLD,
+        "message": "Access granted." if confidence >= PROBABILITY_THRESHOLD else "Access denied.",
+    }
 
 
 def run_system(confidence_threshold: float = 0.6):
@@ -132,20 +181,13 @@ def run_system(confidence_threshold: float = 0.6):
             )
         else:
             try:
-                features = preprocess_face(face_roi)
-                name = model.predict(features)[0]
-
-                if hasattr(model, "predict_proba"):
-                    confidence = float(np.max(model.predict_proba(features)))
-                    if confidence > confidence_threshold:
-                        label = f"{name} ({confidence:.2f})"
-                        color = (0, 255, 0)
-                    else:
-                        label = "Unknown / Low Confidence"
-                        color = (0, 0, 255)
-                else:
-                    label = str(name)
+                prediction_result = predict_face(frame, model=model, distance_threshold=KNN_DISTANCE_THRESHOLD)
+                if prediction_result["access_granted"]:
+                    label = f"{prediction_result['recognized_user']} ({prediction_result['score']:.2f})"
                     color = (0, 255, 0)
+                else:
+                    label = "Unknown / Low Confidence"
+                    color = (0, 0, 255)
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
                 cv2.putText(
@@ -171,4 +213,3 @@ def run_system(confidence_threshold: float = 0.6):
 
 if __name__ == "__main__":
     run_system()
->>>>>>> origin/bethelhem-a

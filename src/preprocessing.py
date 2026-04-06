@@ -1,5 +1,6 @@
 import cv2
-import numpy as np
+
+from src.feature_engineering import image_to_feature_vector
 
 def process_image(image_frame):
     # 1. Grayscale
@@ -12,11 +13,8 @@ def process_image(image_frame):
     if len(faces) > 0:
         (x, y, w, h) = faces[0]
         face_roi = gray[y:y+h, x:x+w]
-        
-        # 3. Resize to 64x64 matching original dataset logic
-        face_resized = cv2.resize(face_roi, (64, 64))
-        
-        # 4. Flatten and Normalize (0 to 1 range)
-        return face_resized.flatten() / 255.0 
+
+        # 3. Resize, flatten, and normalize
+        return image_to_feature_vector(face_roi)
         
     return None

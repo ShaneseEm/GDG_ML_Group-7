@@ -10,7 +10,7 @@ from components.ui_blocks import (
     render_page_intro,
     render_reaction_avatar,
 )
-from services.api import get_prediction_result, login_with_face
+from services.api import get_prediction_result
 from utils.session import initialize_session_state
 
 
@@ -47,10 +47,12 @@ with left_col:
             unsafe_allow_html=True,
         )
 
-        st.camera_input(
-            "",
+        st.caption("Use the browser camera below, then click Scan Face.")
+
+        login_capture_file = st.camera_input(
+            "Take a login photo",
             key="login_camera_input",
-            label_visibility="collapsed",
+            help="Capture one photo and then run face verification.",
         )
 
         circle_placeholder = st.empty()
@@ -80,11 +82,7 @@ with left_col:
         action_col1, action_col2 = st.columns([1.3, 0.7], gap="small")
 
         if action_col1.button("Scan Face", use_container_width=True, type="primary"):
-            for progress_value, feedback in [
-                (12, "Camera ready."),
-                (34, "Checking your position..."),
-                (58, "Verifying your face..."),
-            ]:
+            for progress_value, feedback in [(18, "Opening webcam..."), (42, "Looking for a face...")]:
                 st.session_state.login_status = "scanning"
                 st.session_state.login_message = feedback
                 st.session_state.login_progress = progress_value
@@ -98,12 +96,7 @@ with left_col:
                     )
                 time.sleep(0.08)
 
-            with st.spinner("Scanning your face..."):
-                scan_result = login_with_face()
-
             st.session_state.login_status = "scanning"
-            st.session_state.login_scan = scan_result
-            st.session_state.login_message = scan_result.get("message", "Face scan completed.")
             st.session_state.login_progress = 74
             with circle_placeholder.container():
                 render_camera_progress_overlay(
@@ -115,9 +108,10 @@ with left_col:
                 )
 
             with st.spinner("Verifying your identity..."):
-                prediction_result = get_prediction_result()
+                prediction_result = get_prediction_result(login_capture_file)
 
             st.session_state.login_result = prediction_result
+            st.session_state.login_scan = prediction_result
             st.session_state.login_progress = 100
             st.session_state.login_message = prediction_result.get(
                 "message",
