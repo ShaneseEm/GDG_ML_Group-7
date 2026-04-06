@@ -44,6 +44,64 @@ def detect_face(img, cascade_path="haarcascade_frontalface_default.xml"):
         return None
     return faces[0]
 
+def predict_face(result_frame: np.ndarray) -> dict:
+    """
+    Interface for Streamlit app / services.api.
+    Takes a webcam frame and returns the prediction result in the same format
+    as mock_backend.predict_login_result().
+    """
+    if not MODEL_PATH.exists():
+        return {
+            "success": False,
+            "status": "model_not_loaded",
+            "message": "Model file not found. Please train the model first.",
+            "recognized_user": "Unknown",
+            "confidence": 0.0,
+            "threshold": 0.6,
+            "access_granted": False,
+        }
+
+    try:
+        model = load_model()  # reusing load_model function
+
+        # Preprocess frame 
+        if len(result_frame.shape) == 3:
+            gray = cv2.cvtColor(result_frame, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = result_frame
+
+        face_resized = cv2.resize(gray, (64, 64))
+        face_normalized = face_resized / 255.0
+        features = face_normalized.flatten().reshape(1, -1)
+
+        # Predict name and confidence
+        name = model.predict(features)[0]
+        probs = model.predict_proba(features)
+        confidence = np.max(probs)
+
+        threshold = 0.6
+        access_granted = confidence >= threshold
+
+        return {
+            "success": True,
+            "status": "prediction_complete",
+            "message": "Access granted." if access_granted else "Access denied.",
+            "recognized_user": name if access_granted else "Unknown",
+            "confidence": float(confidence),
+            "threshold": float(threshold),
+            "access_granted": access_granted,
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "status": "prediction_error",
+            "message": f"Prediction failed: {str(e)}",
+            "recognized_user": "Unknown",
+            "confidence": 0.0,
+            "threshold": 0.6,
+            "access_granted": False,
+        }
 
 def run_system(confidence_threshold=0.6):
     try:
