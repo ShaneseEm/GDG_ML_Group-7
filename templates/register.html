@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Member</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Register New Member</h1>
+        <form id="registerForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <input type="hidden" id="imageData" name="image">
+            <div class="camera">
+                <video id="video" autoplay></video>
+                <button type="button" id="captureBtn">Capture Image</button>
+            </div>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <img id="preview" alt="Captured preview" style="display:none; width:100%; margin-top:10px; border:1px solid #ccc;" />
+            <button type="submit">Register</button>
+        </form>
+        <a href="/" class="back-link">Back to Home</a>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('captureBtn');
+        const form = document.getElementById('registerForm');
+        const preview = document.getElementById('preview');
+        const imageDataInput = document.getElementById('imageData');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Error accessing webcam:', err);
+                alert('Cannot access webcam. Please allow camera access and refresh the page.');
+            });
+
+        video.addEventListener('loadedmetadata', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        });
+
+        captureBtn.addEventListener('click', () => {
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                alert('Camera is not ready yet. Wait a moment and try again.');
+                return;
+            }
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+            imageDataInput.value = imageData;
+            preview.src = imageData;
+            preview.style.display = 'block';
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!imageDataInput.value) {
+                alert('Please capture an image before registering.');
+                return;
+            }
+            const formData = new FormData(form);
+            fetch('/register', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Registration successful!');
+                    window.location.href = '/';
+                } else {
+                    alert('Registration failed. Please try again.');
+                }
+            })
+            .catch(() => {
+                alert('Unable to register. Check your network or server status.');
+            });
+        });
+    </script>
+</body>
+</html>

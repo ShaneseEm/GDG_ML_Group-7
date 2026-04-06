@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recognize Face</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Recognize Face</h1>
+        <div class="camera">
+            <video id="video" autoplay></video>
+            <button type="button" id="recognizeBtn">Recognize</button>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <div id="result"></div>
+        <a href="/" class="back-link">Back to Home</a>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const recognizeBtn = document.getElementById('recognizeBtn');
+        const resultDiv = document.getElementById('result');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Error accessing webcam:', err);
+            });
+
+        recognizeBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+            
+            const formData = new FormData();
+            formData.append('image', imageData);
+            
+            fetch('/recognize', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.innerHTML = `<p>Name: ${data.name}</p><p>Confidence: ${(data.score * 100).toFixed(2)}%</p>`;
+            });
+        });
+    </script>
+</body>
+</html>
