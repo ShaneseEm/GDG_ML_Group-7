@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FaceAuth AI — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#08090f; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
+      --accent:#7c6af7; --text:#e8eaf0; --muted:#7a7f96;
+      --green:#4fd1c5; --red:#f87171;
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    .bg-orbs { position:fixed; inset:0; z-index:0; pointer-events:none; }
+    .orb { position:absolute; border-radius:50%; filter:blur(140px); opacity:0.16; animation:drift 14s ease-in-out infinite alternate; }
+    .orb1 { width:500px; height:500px; background:#7c6af7; top:-150px; right:-100px; }
+    .orb2 { width:400px; height:400px; background:#4fd1c5; bottom:-100px; left:-100px; animation-delay:-7s; }
+    @keyframes drift { from{transform:translate(0,0);} to{transform:translate(30px,20px);} }
+
+    nav {
+      position:relative; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.4rem 3rem; border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+    }
+    .logo { font-size:1.25rem; font-weight:800; } .logo span { color:var(--accent); }
+    nav a { text-decoration:none; color:var(--muted); font-size:0.9rem; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:0.2s; }
+    nav a:hover { color:var(--text); background:var(--card); }
+
+    .page { position:relative; z-index:1; max-width:560px; margin:0 auto; padding:4rem 2rem; }
+    .page-title { font-size:2rem; font-weight:800; margin-bottom:0.5rem; }
+    .page-title span { color:var(--accent); }
+    .page-sub { color:var(--muted); font-size:0.95rem; margin-bottom:2.5rem; }
+
+    .panel {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:2rem; backdrop-filter:blur(12px);
+    }
+
+    /* scanning ring around video */
+    .cam-wrap {
+      position:relative; border-radius:16px; overflow:hidden;
+      border:2px solid var(--border); transition:border-color 0.4s;
+    }
+    .cam-wrap.scanning { border-color:var(--accent); box-shadow:0 0 28px rgba(124,106,247,0.35); }
+    .cam-wrap.granted  { border-color:var(--green); box-shadow:0 0 28px rgba(79,209,197,0.4); }
+    .cam-wrap.denied   { border-color:var(--red);   box-shadow:0 0 28px rgba(248,113,113,0.4); }
+
+    video, canvas { width:100%; display:block; background:#0d0e1a; border-radius:14px; }
+    canvas { display:none; }
+
+    .scan-line {
+      position:absolute; left:0; right:0; height:2px;
+      background:linear-gradient(to right, transparent, var(--accent), transparent);
+      animation:scan 2s linear infinite; opacity:0; top:0;
+    }
+    .cam-wrap.scanning .scan-line { opacity:1; }
+    @keyframes scan { from{top:0%} to{top:100%} }
+
+    .btn {
+      display:block; width:100%; margin-top:1.2rem;
+      padding:0.9rem; border-radius:12px; border:none; cursor:pointer;
+      font-size:0.95rem; font-weight:700; font-family:'Inter',sans-serif;
+      transition:all 0.25s;
+    }
+    .btn-login {
+      background:linear-gradient(135deg,#7c6af7,#4fd1c5); color:#fff;
+      box-shadow:0 0 28px rgba(124,106,247,0.3);
+    }
+    .btn-login:hover { transform:translateY(-2px); box-shadow:0 0 44px rgba(124,106,247,0.5); }
+    .btn-login:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+    /* result card */
+    #result {
+      margin-top:1.5rem; padding:1.5rem; border-radius:16px;
+      border:1px solid var(--border); background:rgba(255,255,255,0.02);
+      display:none; text-align:center; animation:fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+    #result.granted { border-color:rgba(79,209,197,0.4); background:rgba(79,209,197,0.05); }
+    #result.denied  { border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.05); }
+
+    .result-icon { font-size:3rem; margin-bottom:0.8rem; }
+    .result-headline { font-size:1.3rem; font-weight:800; margin-bottom:0.4rem; }
+    .result-headline.ok  { color:var(--green); }
+    .result-headline.bad { color:var(--red); }
+    .result-sub { font-size:0.85rem; color:var(--muted); }
+    .score-bar-wrap { margin-top:1rem; }
+    .score-label { font-size:0.78rem; color:var(--muted); display:flex; justify-content:space-between; margin-bottom:0.3rem; }
+    .score-bar { height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; }
+    .score-fill { height:100%; border-radius:999px; transition:width 0.6s ease; }
+    .score-fill.ok  { background:linear-gradient(to right,#4fd1c5,#38b2ac); }
+    .score-fill.bad { background:linear-gradient(to right,#f87171,#ef4444); }
+
+    .history { margin-top:2rem; }
+    .history-title { font-size:0.8rem; font-weight:700; color:var(--muted); letter-spacing:0.4px; margin-bottom:0.8rem; }
+    #history-list { display:flex; flex-direction:column; gap:0.5rem; }
+    .hist-item {
+      display:flex; align-items:center; gap:0.8rem;
+      padding:0.6rem 0.9rem; border-radius:10px; border:1px solid var(--border);
+      font-size:0.82rem; background:rgba(255,255,255,0.02);
+    }
+    .hist-item .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .hist-item.ok .dot  { background:var(--green); }
+    .hist-item.bad .dot { background:var(--red); }
+    .hist-time { color:var(--muted); margin-left:auto; font-size:0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+  <nav>
+    <div class="logo">Face<span>Auth</span> AI</div>
+    <div>
+      <a href="/">Home</a>
+      <a href="/register">Register →</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-title">🔐 <span>Face</span> Login</div>
+    <p class="page-sub">Position your face in the camera and press the Authenticate button.</p>
+
+    <div class="panel">
+      <div class="cam-wrap" id="cam-wrap">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div class="scan-line"></div>
+      </div>
+
+      <button class="btn btn-login" id="btn-login">🔍 Authenticate</button>
+
+      <!-- Result card -->
+      <div id="result">
+        <div class="result-icon" id="res-icon"></div>
+        <div class="result-headline" id="res-headline"></div>
+        <div class="result-sub" id="res-sub"></div>
+        <div class="score-bar-wrap">
+          <div class="score-label">
+            <span>Confidence Score</span>
+            <span id="res-score-val"></span>
+          </div>
+          <div class="score-bar"><div class="score-fill" id="res-score-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- Attempt history -->
+      <div class="history">
+        <div class="history-title">RECENT ATTEMPTS</div>
+        <div id="history-list">
+          <div style="color:var(--muted);font-size:0.82rem;">No attempts yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const video   = document.getElementById('video');
+    const canvas  = document.getElementById('canvas');
+    const ctx     = canvas.getContext('2d');
+    const btn     = document.getElementById('btn-login');
+    const camWrap = document.getElementById('cam-wrap');
+    const result  = document.getElementById('result');
+    const histList= document.getElementById('history-list');
+
+    const history = [];
+
+    navigator.mediaDevices.getUserMedia({video:true})
+      .then(s => video.srcObject = s)
+      .catch(() => alert('Camera access denied!'));
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = '⏳ Scanning…';
+      camWrap.className = 'cam-wrap scanning';
+      result.style.display = 'none';
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      try {
+        const res = await fetch('/api/login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ image: dataUrl })
+        });
+        const data = await res.json();
+        showResult(data);
+        addToHistory(data);
+      } catch(e) {
+        showResult({ granted:false, message:'Network error. Is the server running?' });
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🔍 Authenticate';
+    });
+
+    function showResult(data) {
+      const icon = document.getElementById('res-icon');
+      const hl   = document.getElementById('res-headline');
+      const sub  = document.getElementById('res-sub');
+      const fill = document.getElementById('res-score-fill');
+      const val  = document.getElementById('res-score-val');
+
+      result.style.display = 'block';
+
+      if (data.granted) {
+        camWrap.className = 'cam-wrap granted';
+        result.className = 'granted';
+        icon.textContent = '✅';
+        hl.textContent = data.message;
+        hl.className = 'result-headline ok';
+        sub.textContent = `Score: ${data.score} (threshold: 0.45)`;
+        fill.className = 'score-fill ok';
+        fill.style.width = Math.round(data.score * 100) + '%';
+        val.textContent = (data.score * 100).toFixed(0) + '%';
+      } else {
+        camWrap.className = 'cam-wrap denied';
+        result.className = 'denied';
+        icon.textContent = '❌';
+        hl.textContent = data.message || 'Access Denied';
+        hl.className = 'result-headline bad';
+        sub.textContent = data.score != null ? `Similarity score was too low (${data.score})` : '';
+        fill.className = 'score-fill bad';
+        const w = data.score != null ? Math.round(data.score * 100) : 10;
+        fill.style.width = w + '%';
+        val.textContent = data.score != null ? (data.score * 100).toFixed(0) + '%' : '—';
+      }
+    }
+
+    function addToHistory(data) {
+      const time = new Date().toLocaleTimeString();
+      history.unshift({ granted: data.granted, name: data.name || 'Unknown', time });
+      if (history.length > 5) history.pop();
+
+      histList.innerHTML = history.map(h => `
+        <div class="hist-item ${h.granted ? 'ok' : 'bad'}">
+          <span class="dot"></span>
+          <span>${h.granted ? '✅ ' + h.name : '❌ Denied'}</span>
+          <span class="hist-time">${h.time}</span>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
