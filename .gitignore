@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Data and model artifacts
+/data/raw/
+/data/dataset/
+/data/processed/
+/models/*.pkl
