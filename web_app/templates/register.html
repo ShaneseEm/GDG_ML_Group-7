@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FaceAuth AI — Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#08090f; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
+      --accent:#7c6af7; --accent2:#4fd1c5; --text:#e8eaf0; --muted:#7a7f96;
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    .bg-orbs { position:fixed; inset:0; z-index:0; pointer-events:none; }
+    .orb { position:absolute; border-radius:50%; filter:blur(120px); opacity:0.15; animation:drift 14s ease-in-out infinite alternate; }
+    .orb1 { width:500px; height:500px; background:#7c6af7; top:-150px; left:-150px; }
+    .orb2 { width:400px; height:400px; background:#4fd1c5; bottom:-100px; right:-100px; animation-delay:-7s; }
+    @keyframes drift { from{transform:translate(0,0);} to{transform:translate(35px,25px);} }
+
+    nav {
+      position:relative; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.4rem 3rem; border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+    }
+    .logo { font-size:1.25rem; font-weight:800; }
+    .logo span { color:var(--accent); }
+    nav a { text-decoration:none; color:var(--muted); font-size:0.9rem; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:all 0.2s; }
+    nav a:hover { color:var(--text); background:var(--card); }
+
+    .page { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:4rem 2rem; }
+
+    .page-title { font-size:2rem; font-weight:800; margin-bottom:0.5rem; }
+    .page-title span { color:var(--accent); }
+    .page-sub { color:var(--muted); font-size:0.95rem; margin-bottom:2.5rem; }
+
+    .layout { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+    @media(max-width:680px){ .layout { grid-template-columns:1fr; } }
+
+    /* left panel */
+    .panel {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:1.8rem; backdrop-filter:blur(12px);
+    }
+    .panel label { display:block; font-size:0.82rem; font-weight:600; color:var(--muted); margin-bottom:0.5rem; letter-spacing:0.4px; }
+    .panel input[type=text] {
+      width:100%; padding:0.8rem 1rem; border-radius:10px;
+      background:rgba(255,255,255,0.06); border:1px solid var(--border);
+      color:var(--text); font-size:0.95rem; outline:none;
+      transition:border-color 0.2s;
+    }
+    .panel input[type=text]:focus { border-color:var(--accent); }
+
+    .divider { height:1px; background:var(--border); margin:1.4rem 0; }
+
+    video, canvas {
+      width:100%; border-radius:14px; display:block;
+      background:#0d0e1a; border:1px solid var(--border);
+    }
+    canvas { display:none; }
+
+    .btn {
+      display:block; width:100%; margin-top:1rem;
+      padding:0.85rem; border-radius:12px; border:none; cursor:pointer;
+      font-size:0.92rem; font-weight:700; font-family:'Inter',sans-serif;
+      transition:all 0.25s;
+    }
+    .btn-capture {
+      background:linear-gradient(135deg,#7c6af7,#4fd1c5); color:#fff;
+      box-shadow:0 0 24px rgba(124,106,247,0.3);
+    }
+    .btn-capture:hover { box-shadow:0 0 36px rgba(124,106,247,0.5); transform:translateY(-1px); }
+    .btn-capture:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+    /* progress bar */
+    .progress-wrap { margin-top:1.2rem; }
+    .progress-label { font-size:0.8rem; color:var(--muted); margin-bottom:0.4rem; display:flex; justify-content:space-between; }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background:linear-gradient(to right,#7c6af7,#4fd1c5); border-radius:999px; transition:width 0.4s ease; }
+
+    /* right panel — gallery */
+    .gallery-panel { }
+    .gallery-title { font-size:0.9rem; font-weight:700; margin-bottom:1rem; color:var(--muted); letter-spacing:0.3px; }
+    #gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; }
+    .thumb { border-radius:10px; overflow:hidden; border:1px solid var(--border); position:relative; aspect-ratio:1; background:#0d0e1a; }
+    .thumb img { width:100%; height:100%; object-fit:cover; }
+    .thumb .check {
+      position:absolute; top:4px; right:4px;
+      background:#4fd1c5; color:#0d0e1a; border-radius:50%;
+      width:18px; height:18px; font-size:10px;
+      display:flex; align-items:center; justify-content:center; font-weight:800;
+    }
+
+    /* toast notification */
+    #toast {
+      position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(30px);
+      background:rgba(20,21,35,0.95); border:1px solid var(--border);
+      color:var(--text); padding:0.8rem 1.6rem; border-radius:14px;
+      font-size:0.88rem; font-weight:500; opacity:0; transition:all 0.35s;
+      z-index:100; box-shadow:0 12px 40px rgba(0,0,0,0.5); pointer-events:none;
+      max-width: 380px; text-align:center;
+    }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    #toast.success { border-color:rgba(79,209,197,0.4); }
+    #toast.error { border-color:rgba(248,113,113,0.4); }
+
+    .users-section { margin-top:2.5rem; }
+    .users-title { font-size:0.9rem; font-weight:700; color:var(--muted); margin-bottom:1rem; letter-spacing:0.3px; }
+    #user-list { display:flex; flex-wrap:wrap; gap:0.6rem; }
+    .user-chip {
+      background:rgba(124,106,247,0.12); border:1px solid rgba(124,106,247,0.25);
+      color:#a89cf7; padding:0.35rem 0.9rem; border-radius:999px; font-size:0.8rem; font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+  <nav>
+    <div class="logo">Face<span>Auth</span> AI</div>
+    <div>
+      <a href="/">Home</a>
+      <a href="/login">Login →</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-title">📝 <span>Register</span> Profile</div>
+    <p class="page-sub">Enter your name and capture at least 5 clear photos of your face. Then hit Train!</p>
+
+    <div class="layout">
+      <!-- LEFT: webcam + controls -->
+      <div class="panel">
+        <label for="username">YOUR NAME / ID</label>
+        <input type="text" id="username" placeholder="e.g. Alice" autocomplete="off"/>
+
+        <div class="divider"></div>
+
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>Images captured</span>
+            <span id="count-label">0 / 5</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        </div>
+
+        <button class="btn btn-capture" id="btn-capture" disabled>📸 Capture Face</button>
+        <button class="btn btn-capture" id="btn-train" style="background:linear-gradient(135deg,#4fd1c5,#38b2ac);margin-top:0.7rem;" disabled>🧠 Train Model</button>
+      </div>
+
+      <!-- RIGHT: captured thumbnails -->
+      <div class="gallery-panel">
+        <div class="panel">
+          <div class="gallery-title">CAPTURED FRAMES</div>
+          <div id="gallery"></div>
+          <p id="gallery-empty" style="color:var(--muted);font-size:0.82rem;margin-top:0.5rem;">No images yet — start capturing!</p>
+        </div>
+
+        <div class="users-section">
+          <div class="panel">
+            <div class="users-title">REGISTERED USERS</div>
+            <div id="user-list"><span style="color:var(--muted);font-size:0.82rem;">Loading…</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const video    = document.getElementById('video');
+    const canvas   = document.getElementById('canvas');
+    const ctx      = canvas.getContext('2d');
+    const btnCap   = document.getElementById('btn-capture');
+    const btnTrain = document.getElementById('btn-train');
+    const nameInp  = document.getElementById('username');
+    const gallery  = document.getElementById('gallery');
+    const empty    = document.getElementById('gallery-empty');
+    const fill     = document.getElementById('progress-fill');
+    const countLbl = document.getElementById('count-label');
+    const toast    = document.getElementById('toast');
+
+    let captureCount = 0;
+    const TARGET = 5;
+
+    // Start camera
+    navigator.mediaDevices.getUserMedia({ video:true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(() => showToast('Camera access denied!', 'error'));
+
+    // Enable capture only when name is filled
+    nameInp.addEventListener('input', () => {
+      btnCap.disabled = nameInp.value.trim() === '';
+    });
+
+    function showToast(msg, type='success') {
+      toast.textContent = msg;
+      toast.className = `show ${type}`;
+      setTimeout(() => { toast.className = ''; }, 3500);
+    }
+
+    function updateProgress() {
+      const pct = Math.min((captureCount / TARGET) * 100, 100);
+      fill.style.width = pct + '%';
+      countLbl.textContent = `${captureCount} / ${TARGET}`;
+      if (captureCount >= TARGET) btnTrain.disabled = false;
+    }
+
+    btnCap.addEventListener('click', async () => {
+      const name = nameInp.value.trim();
+      if (!name) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      btnCap.disabled = true;
+      btnCap.textContent = 'Saving…';
+
+      try {
+        const res = await fetch('/api/register', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name, image: dataUrl })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          captureCount++;
+          updateProgress();
+          showToast(data.message, 'success');
+          empty.style.display = 'none';
+
+          // Add thumbnail
+          const div = document.createElement('div');
+          div.className = 'thumb';
+          div.innerHTML = `<img src="${dataUrl}"/><div class="check">✓</div>`;
+          gallery.appendChild(div);
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch(e) {
+        showToast('Network error. Try again.', 'error');
+      }
+
+      btnCap.disabled = false;
+      btnCap.textContent = '📸 Capture Face';
+    });
+
+    btnTrain.addEventListener('click', async () => {
+      btnTrain.textContent = '⏳ Training…';
+      btnTrain.disabled = true;
+      showToast('Training model — this may take a moment!');
+
+      // Trigger train endpoint
+      try {
+        const res = await fetch('/api/train', { method:'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast('🎉 Model trained! Head to Login to test it.', 'success');
+          loadUsers();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch {
+        showToast('Training failed. Check server logs.', 'error');
+      }
+      btnTrain.textContent = '🧠 Train Model';
+      btnTrain.disabled = false;
+    });
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/users');
+        const data = await res.json();
+        const list = document.getElementById('user-list');
+        if (data.users.length === 0) {
+          list.innerHTML = '<span style="color:var(--muted);font-size:0.82rem;">No users registered yet.</span>';
+        } else {
+          list.innerHTML = data.users.map(u =>
+            `<div class="user-chip">👤 ${u.name} <span style="opacity:0.6">(${u.images})</span></div>`
+          ).join('');
+        }
+      } catch {}
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

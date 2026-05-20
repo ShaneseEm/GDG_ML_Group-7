@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv/
 __pycache__/
 *.pyc
@@ -9,3 +10,14 @@ __pycache__/
 /data/dataset/
 /data/processed/
 /models/*.pkl
+=======
+faces_db/
+__pycache__/
+*.pyc
+.env
+.venv
+venv/
+env/
+.DS_Store
+faceauth-ai/data/raw/
+>>>>>>> 1d7b6260967d14f84a65906bf3c5100c95d64a4f
