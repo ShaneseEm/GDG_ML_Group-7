@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # FaceAuth AI
 
 FaceAuth AI is a simple face-based authentication system built with OpenCV, scikit-learn, and Streamlit. It supports:
